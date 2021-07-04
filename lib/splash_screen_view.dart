@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:darurat_app/form_laporan_bantuan.dart';
+import 'package:darurat_app/form_laporan_bencana.dart';
 import 'package:darurat_app/informasi.dart';
 import 'package:darurat_app/login.dart';
 import 'package:darurat_app/register.dart';
@@ -25,7 +26,7 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
     return Timer(duration, (){
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_){
-          return Laporan();
+          return HomePage();
         })
       );
     });
