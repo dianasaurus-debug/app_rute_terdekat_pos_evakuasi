@@ -1,3 +1,5 @@
+import 'package:darurat_app/login.dart';
+import 'package:darurat_app/register.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter/material.dart';
@@ -37,7 +39,9 @@ class WelcomePage extends StatelessWidget {
                   children: <Widget>[
                     OutlinedButton(
                       onPressed: () {
-                        print('Received click');
+                        Route route = MaterialPageRoute(
+                            builder: (context) => Login());
+                        Navigator.push(context, route);
                       },
                       style: styleLogin,
                       child: const Text('LOGIN'),
@@ -45,7 +49,11 @@ class WelcomePage extends StatelessWidget {
                     const SizedBox(height: 20),
                     ElevatedButton(
                       style: styleRegister,
-                      onPressed: () {},
+                      onPressed: () {
+                        Route route = MaterialPageRoute(
+                            builder: (context) => Register());
+                        Navigator.push(context, route);
+                      },
                       child: const Text('REGISTER'),
                     ),
                   ]))

@@ -1,6 +1,8 @@
 import 'package:darurat_app/form_laporan_bantuan.dart';
 import 'package:darurat_app/form_laporan_bencana.dart';
 import 'package:darurat_app/informasi.dart';
+import 'package:darurat_app/rute_alternatif.dart';
+import 'package:darurat_app/rute_evakuasi.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatelessWidget {
@@ -30,99 +32,121 @@ class HomePage extends StatelessWidget {
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              Card(
-                                elevation: 5,
-                                color: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: SizedBox(
-                                  width: 130,
-                                  height: 120,
-                                  child: Center(
-                                      child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Image.asset(
-                                        "images/logo-jalan.png",
-                                        width: 70.0,
-                                        height: 70.0,
-                                      ),
-                                      Text('Rute Alternatif',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 13,
-                                              color: Colors.black,
-                                              fontFamily: 'Open Sans'))
-                                    ],
-                                  )),
-                                ),
-                              ),
-                              Card(
-                                elevation: 5,
-                                color: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: SizedBox(
-                                  width: 130,
-                                  height: 120,
-                                  child: Center(
-                                      child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Image.asset(
-                                        "images/logo-evakuasi.png",
-                                        width: 70.0,
-                                        height: 70.0,
-                                      ),
-                                      Text('Posko Evakuasi',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 13,
-                                              color: Colors.black,
-                                              fontFamily: 'Open Sans'))
-                                    ],
-                                  )),
+                              GestureDetector(
+                                onTap: () {
+                                  Route route = MaterialPageRoute(
+                                      builder: (context) => RuteAlternatif());
+                                  Navigator.push(context, route);
+                                },
+                                child: Card(
+                                  elevation: 5,
+                                  color: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: SizedBox(
+                                    width: 130,
+                                    height: 120,
+                                    child: Center(
+                                        child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Image.asset(
+                                          "images/logo-jalan.png",
+                                          width: 70.0,
+                                          height: 70.0,
+                                        ),
+                                        Text('Rute Alternatif',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 13,
+                                                color: Colors.black,
+                                                fontFamily: 'Open Sans'))
+                                      ],
+                                    )),
+                                  ),
                                 ),
                               ),
+                              GestureDetector(
+                                  onTap: () {
+                                    Route route = MaterialPageRoute(
+                                        builder: (context) => RuteEvakuasi());
+                                    Navigator.push(context, route);
+                                  },
+                                  child: Card(
+                                    elevation: 5,
+                                    color: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: SizedBox(
+                                      width: 130,
+                                      height: 120,
+                                      child: Center(
+                                          child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Image.asset(
+                                            "images/logo-evakuasi.png",
+                                            width: 70.0,
+                                            height: 70.0,
+                                          ),
+                                          Text('Posko Evakuasi',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 13,
+                                                  color: Colors.black,
+                                                  fontFamily: 'Open Sans'))
+                                        ],
+                                      )),
+                                    ),
+                                  )),
                             ])),
                     Container(
                         margin: const EdgeInsets.only(bottom: 20),
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              Card(
-                                elevation: 5,
-                                color: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: SizedBox(
-                                  width: 130,
-                                  height: 120,
-                                  child: Center(
-                                      child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Image.asset(
-                                        "images/logo-rute.png",
-                                        width: 70.0,
-                                        height: 70.0,
-                                      ),
-                                      Text('Rute Evakuasi',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 13,
-                                              color: Colors.black,
-                                              fontFamily: 'Open Sans'))
-                                    ],
+                              GestureDetector(
+                                  onTap: () {
+                                    Route route = MaterialPageRoute(
+                                        builder: (context) => RuteEvakuasi());
+                                    Navigator.push(context, route);
+                                  },
+                                  child: Card(
+                                    elevation: 5,
+                                    color: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: SizedBox(
+                                      width: 130,
+                                      height: 120,
+                                      child: Center(
+                                          child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Image.asset(
+                                            "images/logo-rute.png",
+                                            width: 70.0,
+                                            height: 70.0,
+                                          ),
+                                          Text('Rute Evakuasi',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 13,
+                                                  color: Colors.black,
+                                                  fontFamily: 'Open Sans'))
+                                        ],
+                                      )),
+                                    ),
                                   )),
-                                ),
-                              ),
                               GestureDetector(
                                   onTap: () {
                                     Route route = MaterialPageRoute(
