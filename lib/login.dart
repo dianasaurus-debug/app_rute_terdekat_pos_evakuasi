@@ -1,5 +1,10 @@
+import 'dart:convert';
+
+import 'package:darurat_app/home.dart';
+import 'package:darurat_app/services/auth-service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 // Define a custom Form widget.
 class Login extends StatefulWidget {
   @override
@@ -16,7 +21,11 @@ class LoginState extends State<Login> {
   //
   // Note: This is a `GlobalKey<FormState>`,
   // not a GlobalKey<LoginState>.
+  var email;
+  var password;
+  bool _isLoading = false;
   final _formKey = GlobalKey<FormState>();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
@@ -39,95 +48,133 @@ class LoginState extends State<Login> {
                   fontFamily: 'Roboto')),
           backgroundColor: Color(0xff1f4ea9),
         ),
-        body: Form(
-            key: _formKey,
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-
-                children: <Widget>[
-                  Align(
-                    alignment: Alignment.center,
-                    child: Text('Login', style: TextStyle(fontSize: 28, fontFamily: 'Roboto'),),
-                  ),
-                  const SizedBox(height: 25),
-                  TextFormField(
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.lightBlueAccent, width: 2),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Color(0xff1f4ea9), width: 2),
-                      ),
-                      errorBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.red, width: 2),
-                      ),
-                      focusedErrorBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.red, width: 2),
-                      ),
-                      hintText: 'E-Mail',
+        body:
+        SingleChildScrollView(
+          child: Form(
+              key: _formKey,
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Align(
+                      alignment: Alignment.center,
+                      child: Text('Login', style: TextStyle(fontSize: 28, fontFamily: 'Roboto'),),
                     ),
-                    // The validator receives the text that the user has entered.
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Field tidak boleh kosong';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 15),
-                  TextFormField(
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.lightBlueAccent, width: 2),
+                    const SizedBox(height: 25),
+                    TextFormField(
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.lightBlueAccent, width: 2),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xff1f4ea9), width: 2),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.red, width: 2),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.red, width: 2),
+                        ),
+                        hintText: 'E-Mail',
                       ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Color(0xff1f4ea9), width: 2),
-                      ),
-                      errorBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.red, width: 2),
-                      ),
-                      focusedErrorBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.red, width: 2),
-                      ),
-                      hintText: 'Password',
+                      // The validator receives the text that the user has entered.
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Field tidak boleh kosong';
+                        }
+                        email = value;
+                        return null;
+                      },
                     ),
-                    // The validator receives the text that the user has entered.
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Field tidak boleh kosong';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
+                    const SizedBox(height: 15),
+                    TextFormField(
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.lightBlueAccent, width: 2),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xff1f4ea9), width: 2),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.red, width: 2),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.red, width: 2),
+                        ),
+                        hintText: 'Password',
+                      ),
+                      // The validator receives the text that the user has entered.
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Field tidak boleh kosong';
+                        }
+                        password = value;
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
 
-                  ElevatedButton(
-                    onPressed: () {
-                      // Validate returns true if the form is valid, or false otherwise.
-                      if (_formKey.currentState!.validate()) {
-                        // If the form is valid, display a snackbar. In the real world,
-                        // you'd often call a server or save the information in a database.
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Processing Data')));
-                      }
-                    },
-                    style: styleLogin,
-                    child: Text('LOGIN'),
-                  ),
-                  const SizedBox(height: 10),
-                  Align(
-                    alignment: Alignment.center,
-                    child: Text('Belum punya akun? Register', style: TextStyle(fontSize: 15, fontFamily: 'Roboto'),),
-                  ),
-                ],
-              ),
-            )
+                    ElevatedButton(
+                      onPressed: () {
+                        // Validate returns true if the form is valid, or false otherwise.
+                        if (_formKey.currentState!.validate()) {
+                          // If the form is valid, display a snackbar. In the real world,
+                          // you'd often call a server or save the information in a database.
+                          _login();
+                        }
+                      },
+                      style: styleLogin,
+                      child: Text(_isLoading? 'Loading...' : 'Login',),
+                    ),
+                    const SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Text('Belum punya akun? Register', style: TextStyle(fontSize: 15, fontFamily: 'Roboto'),),
+                    ),
+                  ],
+                ),
+              )
+          )
         )
+
     );
+  }
+  void _login() async{
+    setState(() {
+      _isLoading = true;
+    });
+    var data = {
+      'email' : email,
+      'password' : password
+    };
+
+    var res = await Network().authData(data, 'auth/login');
+    var body = json.decode(res.body);
+    if(body['success']==true){
+      SharedPreferences localStorage = await SharedPreferences.getInstance();
+      localStorage.setString('token', json.encode(body['token']));
+      localStorage.setString('user', json.encode(body['user']));
+      Navigator.push(
+        context,
+        new MaterialPageRoute(
+            builder: (context) => HomePage()
+        ),
+      );
+    }else{
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login gagal!!', style: TextStyle(color: Colors.white, fontSize: 20)),
+
+              backgroundColor: Colors.red)
+      );
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+
   }
 }

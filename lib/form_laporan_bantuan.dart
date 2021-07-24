@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:darurat_app/services/laporan-provider.dart';
+import 'package:darurat_app/services/laporan-service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -17,11 +21,17 @@ class _LaporData {
   String keterangan = '';
 }
 
+class Bantuan {
+  const Bantuan(this.idBantuan, this.type);
+  final String type;
+  final int idBantuan;
+
+}
 class Bencana {
   const Bencana(this.idBencana, this.nama_bencana);
+
   final String nama_bencana;
   final int idBencana;
-
 }
 // Define a corresponding State class.
 // This class holds data related to the form.
@@ -32,13 +42,51 @@ class LaporanBantuanState extends State<LaporanBantuan> {
   // Note: This is a `GlobalKey<FormState>`,
   // not a GlobalKey<LaporanBantuanState>.
   _LaporData _dataLaporanBantuan = new _LaporData();
-  Bencana selectedBencana = const Bencana(1, 'Banjir');
-  TextEditingController textController = TextEditingController(text: "Tanggal");
-  List<Bencana> dataBencana = <Bencana>[const Bencana(1,'Banjir'), const Bencana(2,'Longsor'), const Bencana(3,'Kekeringan'),const Bencana(4,'Puting Beliung')];
+  // Bencana selectedBencana = const Bencana(1, 'Banjir');
+  // Bantuan selectedBantuan = const Bantuan(1, 'Banjir');
 
+  TextEditingController textController = TextEditingController(text: "Tanggal");
+  List<Bantuan> dataBantuan = <Bantuan>[];
+  late Future<List<dynamic>> futureDataLaporan;
+  bool _isLoading = false;
+  List<Bencana> dataBencana = <Bencana>[
+    const Bencana(1, 'Banjir'),
+    const Bencana(2, 'Longsor'),
+    const Bencana(3, 'Kekeringan'),
+    const Bencana(4, 'Puting Beliung')
+  ];
+  String pelapor = '';
+  String deskripsi = '';
+  String bencana = '';
+  String status = '';
+  String nomor_hp = '';
+  String tanggal = '';
+  int bencana_id = 0;
+  int bantuan_id = 0;
 
   final _formKey = GlobalKey<FormState>();
-
+  void getDataBantuan() async {
+    var res = await Laporan().getDataBantuan();
+    var body = json.decode(res.body);
+    print(body);
+    if (body['success']) {
+      for(var i=0;i<body['data'].length;i++){
+        setState(() {
+          dataBantuan.add(Bantuan(body['data'][i]['id'], body['data'][i]['type']));
+        });
+      }
+    } else {
+      print('gagal');
+    }
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getDataBantuan();
+    futureDataLaporan = fetchLaporanBantuan();
+    print(dataBantuan);
+  }
   @override
   Widget build(BuildContext context) {
     final ButtonStyle styleLaporanBantuan = ElevatedButton.styleFrom(
@@ -117,115 +165,39 @@ class LaporanBantuanState extends State<LaporanBantuan> {
               alignment: Alignment.topRight,
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
-              child: ListView(
-                padding: EdgeInsets.fromLTRB(20, 10, 40, 20),
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        color: Colors.white70,
-                        child: Padding(
-                          padding: EdgeInsets.all(15),
-                          child: Text('Laporan Bantuan 02 Desember 2020\nNama : Rachmat\nBencana : Tanah Longsor\nAlamat : Jl. Raya Dander No.06\nNo. HP : 087998968909\nKeterangan : Tidak bisa ke posko  evakuasi karena tidak bisa jalan, mohon dijemput ', style: TextStyle(color: Colors.black, height: 1.2),),
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                            },
-                            style: stylebuttondelete,
-                            child: Text('HAPUS', style: TextStyle(fontSize: 13)),
-                          ),
-                          const SizedBox(width: 5),
-                          ElevatedButton(
-                            onPressed: () {
+              child:
 
-                            },
-                            style: stylebuttonvalidasi,
-                            child: Text('VALIDASI', style: TextStyle(fontSize: 13)),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        color: Colors.white70,
-                        child: Padding(
-                          padding: EdgeInsets.all(15),
-                          child: Text('Laporan Bantuan 02 Desember 2020\nNama : Rachmat\nBencana : Tanah Longsor\nAlamat : Jl. Raya Dander No.06\nNo. HP : 087998968909\nKeterangan : Tidak bisa ke posko  evakuasi karena tidak bisa jalan, mohon dijemput ', style: TextStyle(color: Colors.black,  height: 1.2),),
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                            },
-                            style: stylebuttondelete,
-                            child: Text('HAPUS', style: TextStyle(fontSize: 13)),
-                          ),
-                          const SizedBox(width: 5),
-                          ElevatedButton(
-                            onPressed: () {
+              FutureBuilder<List<dynamic>>(
+                  future: futureDataLaporan,
+                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                    if (snapshot.hasData) {
+                      return ListView.builder(
+                          itemCount: snapshot.data.length,
+                          padding: EdgeInsets.fromLTRB(20, 10, 40, 20),
+                          itemBuilder: (BuildContext context, int index) {
+                            return
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Card(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    color: Colors.white70,
+                                    child: Padding(
+                                      padding: EdgeInsets.all(15),
+                                      child: Text('Laporan Bantuan ${snapshot.data![index]['tanggal']}\nNama : ${snapshot.data![index]['pelapor']}\nBantuan : ${snapshot.data![index]['bantuan']}\nKeterangan : ${snapshot.data![index]['deskripsi']}\nNo. HP : ${snapshot.data![index]['nomor_hp']}\nSTATUS : ${snapshot.data![index]['status']}', style: TextStyle(color: Colors.black, height: 1.2),),
+                                    ),
+                                  ),
+                                ],
+                              );
+                          }
+                      );
+                    } else {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                  }),
 
-                            },
-                            style: stylebuttonvalidasi,
-                            child: Text('VALIDASI', style: TextStyle(fontSize: 13)),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        color: Colors.white70,
-                        child: Padding(
-                          padding: EdgeInsets.all(15),
-                          child: Text('Laporan Bantuan 02 Desember 2020\nNama : Rachmat\nBencana : Tanah Longsor\nAlamat : Jl. Raya Dander No.06\nNo. HP : 087998968909\nKeterangan : Tidak bisa ke posko  evakuasi karena tidak bisa jalan, mohon dijemput ', style: TextStyle(color: Colors.black,  height: 1.2),),
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                            },
-                            style: stylebuttondelete,
-                            child: Text('HAPUS', style: TextStyle(fontSize: 13)),
-                          ),
-                          const SizedBox(width: 5),
-                          ElevatedButton(
-                            onPressed: () {
-
-                            },
-                            style: stylebuttonvalidasi,
-                            child: Text('VALIDASI', style: TextStyle(fontSize: 13)),
-                          ),
-                        ],
-                      )
-                    ],
-                  )
-                ],
-              ),
               color: Colors.white,
             ),
 
@@ -250,62 +222,6 @@ class LaporanBantuanState extends State<LaporanBantuan> {
                       endIndent: 10,
                     ),
                     const SizedBox(height: 10),
-                    TextFormField(
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderSide:
-                          BorderSide(color: Colors.lightBlueAccent, width: 2),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide:
-                          BorderSide(color: Color(0xff1f4ea9), width: 2),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.red, width: 2),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.red, width: 2),
-                        ),
-                        hintText: 'Nama',
-                        isDense: true
-                      ),
-                      // The validator receives the text that the user has entered.
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Field tidak boleh kosong';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 15),
-                    // TextFormField(
-                    //   keyboardType: TextInputType.datetime,
-                    //   decoration: InputDecoration(
-                    //     focusedBorder: OutlineInputBorder(
-                    //       borderSide:
-                    //           BorderSide(color: Colors.lightBlueAccent, width: 2),
-                    //     ),
-                    //     enabledBorder: OutlineInputBorder(
-                    //       borderSide:
-                    //           BorderSide(color: Color(0xff1f4ea9), width: 2),
-                    //     ),
-                    //     errorBorder: OutlineInputBorder(
-                    //       borderSide: BorderSide(color: Colors.red, width: 2),
-                    //     ),
-                    //     focusedErrorBorder: OutlineInputBorder(
-                    //       borderSide: BorderSide(color: Colors.red, width: 2),
-                    //     ),
-                    //     hintText: 'Tanggal',
-                    //   ),
-                    //   // The validator receives the text that the user has entered.
-                    //   validator: (value) {
-                    //     if (value == null || value.isEmpty) {
-                    //       return 'Field tidak boleh kosong';
-                    //     }
-                    //     return null;
-                    //   },
-                    // ),
                     TextFormField(
                       readOnly: true,
                       controller: textController,
@@ -338,70 +254,13 @@ class LaporanBantuanState extends State<LaporanBantuan> {
                           if (selectedDate != null) {
                             textController.text =
                                 DateFormat('yyyy-MM-dd').format(selectedDate);
+                            tanggal = DateFormat('yyyy-MM-dd').format(selectedDate);
                           }
                         });
                       },
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter date.';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 15),
-                    TextFormField(
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderSide:
-                          BorderSide(color: Colors.lightBlueAccent, width: 2),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide:
-                          BorderSide(color: Color(0xff1f4ea9), width: 2),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.red, width: 2),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.red, width: 2),
-                        ),
-                        hintText: 'Alamat',
-                          isDense: true
-                      ),
-                      // The validator receives the text that the user has entered.
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Field tidak boleh kosong';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 15),
-                    TextFormField(
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderSide:
-                          BorderSide(color: Colors.lightBlueAccent, width: 2),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide:
-                          BorderSide(color: Color(0xff1f4ea9), width: 2),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.red, width: 2),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.red, width: 2),
-                        ),
-                        hintText: 'No Handphone',
-                          isDense: true
-                      ),
-                      // The validator receives the text that the user has entered.
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Field tidak boleh kosong';
                         }
                         return null;
                       },
@@ -430,7 +289,7 @@ class LaporanBantuanState extends State<LaporanBantuan> {
                       onChanged: (newValue) {
                         setState(() {
                           if(newValue!=null){
-                            selectedBencana = newValue;
+                            bencana_id = newValue.idBencana;
                           }
                         });
                       },
@@ -439,6 +298,44 @@ class LaporanBantuanState extends State<LaporanBantuan> {
                           value: bencana,
                           child: new Text(
                             bencana.nama_bencana,
+                            style: new TextStyle(color: Colors.black),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 15),
+                    DropdownButtonFormField<Bantuan>(
+                      elevation: 16,
+                      decoration: InputDecoration(
+                          focusedBorder: OutlineInputBorder(
+                            borderSide:
+                            BorderSide(color: Colors.lightBlueAccent, width: 2),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide:
+                            BorderSide(color: Color(0xff1f4ea9), width: 2),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.red, width: 2),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.red, width: 2),
+                          ),
+                          hintText: 'Pilih bantuan',
+                          isDense: true
+                      ),
+                      onChanged: (newValue) {
+                        setState(() {
+                          if(newValue!=null){
+                            bantuan_id = newValue.idBantuan;
+                          }
+                        });
+                      },
+                      items: dataBantuan.map((Bantuan bantuan) {
+                        return new DropdownMenuItem<Bantuan>(
+                          value: bantuan,
+                          child: new Text(
+                            bantuan.type,
                             style: new TextStyle(color: Colors.black),
                           ),
                         );
@@ -471,6 +368,7 @@ class LaporanBantuanState extends State<LaporanBantuan> {
                         if (value == null || value.isEmpty) {
                           return 'Field tidak boleh kosong';
                         }
+                        deskripsi = value;
                         return null;
                       },
                     ),
@@ -481,12 +379,13 @@ class LaporanBantuanState extends State<LaporanBantuan> {
                         if (_formKey.currentState!.validate()) {
                           // If the form is valid, display a snackbar. In the real world,
                           // you'd often call a server or save the information in a database.
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Processing Data')));
+                          // ScaffoldMessenger.of(context).showSnackBar(
+                          //     SnackBar(content: Text('Processing Data')));
+                          _laporkan();
                         }
                       },
                       style: styleLaporanBantuan,
-                      child: Text('Lapor'),
+                      child: Text(_isLoading? 'Loading...' : 'Laporkan'),
                     ),
                   ],
                 ),
@@ -495,4 +394,43 @@ class LaporanBantuanState extends State<LaporanBantuan> {
         )
     );
   }
+  void _laporkan() async{
+    setState(() {
+      _isLoading = true;
+    });
+    var data = {
+      'pelapor' : pelapor,
+      'deskripsi' : deskripsi,
+      'bencana' : bencana,
+      'status' : status,
+      'nomor_hp' : nomor_hp,
+      'tanggal' : tanggal,
+      'bencana_id' : bencana_id,
+      'bantuan_id' : bantuan_id,
+
+    };
+
+    var res = await Laporan().makeLaporan(data, 'laporan-bantuan');
+    var body = json.decode(res.body);
+    print(data);
+    if(body['success']==true){
+      Navigator.push(
+        context,
+        new MaterialPageRoute(
+            builder: (context) => LaporanBantuan()
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Pengajuan laporan gagal!!', style: TextStyle(color: Colors.white, fontSize: 20)),
+
+              backgroundColor: Colors.red)
+      );
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
 }

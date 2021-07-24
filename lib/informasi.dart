@@ -1,7 +1,27 @@
+import 'package:darurat_app/services/pos-evakuasi.dart';
+import 'package:darurat_app/services/riwayat-bencana.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class Informasi extends StatelessWidget {
+class Informasi extends StatefulWidget {
+  Informasi({Key? key}) : super(key: key);
+
+  @override
+  _InformasiState createState() => _InformasiState();
+}
+
+class _InformasiState extends State<Informasi> {
+  late Future<List<dynamic>> futureRiwayatBencana;
+  late Future<List<dynamic>> futurePosEvakuasi;
+  var i = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    futureRiwayatBencana = fetchRiwayatBencana();
+    futurePosEvakuasi = fetchPosEvakuasi();
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -43,135 +63,128 @@ class Informasi extends StatelessWidget {
                   ],
                 )),
             body: TabBarView(children: [
-              SingleChildScrollView(
-                  child: DataTable(
-                columnSpacing: 10.0,
-                columns: const <DataColumn>[
-                  DataColumn(
-                      label: Text(
-                        'No',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      numeric: true),
-                  DataColumn(
-                    label: Text(
-                      'Kecamatan',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  DataColumn(
-                    label: Text(
-                      'Desa',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  DataColumn(
-                    label: Text(
-                      'Nama Posko',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-                rows: [
-                  DataRow(
-                    cells: <DataCell>[
-                      DataCell(Text('1', textAlign: TextAlign.left)),
-                      DataCell(Text('Bojonegoro', textAlign: TextAlign.left)),
-                      DataCell(Text('Sukorejo', textAlign: TextAlign.left)),
-                      DataCell(
-                        Container(
-                            width: 170, //SET width
-                            child: Text(
-                                'RS Umum Daerah Dr.R.Sosodoro Djatikoesoemo',
-                                textAlign: TextAlign.left)),
-                      )
-                    ],
-                  ),
-                  DataRow(
-                    cells: <DataCell>[
-                      DataCell(Text('2', textAlign: TextAlign.left)),
-                      DataCell(Text('Sumberrejo', textAlign: TextAlign.left)),
-                      DataCell(Text('Sumberrejo', textAlign: TextAlign.left)),
-                      DataCell(
-                        Container(
-                            width: 170, //SET width
-                            child: Text('RS Umum Muhamadiyah Sumberrejo',
-                                textAlign: TextAlign.left)),
-                      )
-                    ],
-                  ),
-                  DataRow(
-                    cells: <DataCell>[
-                      DataCell(Text('3', textAlign: TextAlign.left)),
-                      DataCell(Text('Padangan', textAlign: TextAlign.left)),
-                      DataCell(Text('Ngasinan', textAlign: TextAlign.left)),
-                      DataCell(
-                        Container(
-                            width: 200, //SET width
-                            child: Text('RS Umum Daerah Padangan',
-                                textAlign: TextAlign.left)),
-                      )
-                    ],
-                  ),
-                ],
-              )),
-              SingleChildScrollView(
-                  child: DataTable(
-                columnSpacing: 10.0,
-                columns: const <DataColumn>[
-                  DataColumn(
-                    label: Text(
-                      'No',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  DataColumn(
-                    label: Text(
-                      'Tahun',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    numeric: true
-                  ),
-                  DataColumn(
-                    label: Text(
-                      'Desa',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  DataColumn(
-                    label: Text(
-                      'Bencana',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-                rows: const <DataRow>[
-                  DataRow(
-                    cells: <DataCell>[
-                      DataCell(Text('1')),
-                      DataCell(Text('2017')),
-                      DataCell(Text('Canganaan')),
-                      DataCell(Text('Banjir')),
-                    ],
-                  ),
-                  DataRow(
-                    cells: <DataCell>[
-                      DataCell(Text('2')),
-                      DataCell(Text('2017')),
-                      DataCell(Text('Kedungprimben')),
-                      DataCell(Text('Banjir')),
-                    ],
-                  ),
-                  DataRow(
-                    cells: <DataCell>[
-                      DataCell(Text('3')),
-                      DataCell(Text('2017')),
-                      DataCell(Text('Trejo')),
-                      DataCell(Text('Banjir')),
-                    ],
-                  ),
-                ],
-              )),
+              FutureBuilder<List<dynamic>>(
+                  future: futurePosEvakuasi,
+                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                    if (snapshot.hasData) {
+                      return SingleChildScrollView(
+                          child: DataTable(
+                              columnSpacing: 10.0,
+                              columns: const <DataColumn>[
+                                DataColumn(
+                                    label: Text(
+                                      'No',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    numeric: true),
+                                DataColumn(
+                                  label: Text(
+                                    'Kecamatan',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Desa',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Nama Posko',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ],
+                              rows: snapshot.data.map<DataRow>((e) {
+                                return DataRow(
+                                  cells: <DataCell>[
+                                    DataCell(Text(
+                                        (snapshot.data.indexOf(e) + 1)
+                                            .toString(),
+                                        textAlign: TextAlign.left)),
+                                    DataCell(Text(e['kecamatan'],
+                                        textAlign: TextAlign.left)),
+                                    DataCell(Text(e['desa'],
+                                        textAlign: TextAlign.left)),
+                                    DataCell(
+                                      Container(
+                                          width: 170, //SET width
+                                          child: Text(e['nama_posko'],
+                                              textAlign: TextAlign.left)),
+                                    )
+                                  ],
+                                );
+                              }).toList()));
+                    } else {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                  }),
+              FutureBuilder<List<dynamic>>(
+                  future: futureRiwayatBencana,
+                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                    if (snapshot.hasData) {
+                      return SingleChildScrollView(
+                          child: DataTable(
+                              columnSpacing: 10.0,
+                              columns: const <DataColumn>[
+                                DataColumn(
+                                    label: Text(
+                                      'No',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    numeric: true),
+                                DataColumn(
+                                  label: Text(
+                                    'Tahun',
+                                    style:
+                                    TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Desa',
+                                    style:
+                                    TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Bencana',
+                                    style:
+                                    TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ],
+                              rows: snapshot.data.map<DataRow>((e) {
+                                return DataRow(
+                                  cells: <DataCell>[
+                                    DataCell(Text(
+                                        (snapshot.data.indexOf(e) + 1)
+                                            .toString(),
+                                        textAlign: TextAlign.left)),
+                                    DataCell(Text(e['tahun'].toString(),
+                                        textAlign: TextAlign.left)),
+                                    DataCell(Text(e['desa'],
+                                        textAlign: TextAlign.left)),
+                                    DataCell(
+                                      Container(
+                                          width: 170, //SET width
+                                          child: Text(e['bencana'],
+                                              textAlign: TextAlign.left)),
+                                    )
+                                  ],
+                                );
+                              }).toList()));
+                    } else {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                  }),
             ])));
   }
 }

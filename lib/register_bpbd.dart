@@ -40,29 +40,28 @@ import 'Models/User.dart';
 //   }
 // }
 
-class Register extends StatefulWidget {
+class RegisterBPBD extends StatefulWidget {
   @override
-  RegisterState createState() {
-    return RegisterState();
+  RegisterBPBDState createState() {
+    return RegisterBPBDState();
   }
 }
 
 // Define a corresponding State class.
 // This class holds data related to the form.
-class RegisterState extends State<Register> {
+class RegisterBPBDState extends State<RegisterBPBD> {
   // Create a global key that uniquely identifies the Form widget
   // and allows validation of the form.
   //
   // Note: This is a `GlobalKey<FormState>`,
-  // not a GlobalKey<RegisterState>.
+  // not a GlobalKey<RegisterBPBDState>.
   bool _isLoading = false;
 
-  late final String name;
+  late final String nip;
   late final String username;
   late final String email;
   late final String password;
-  late final String phone;
-  late final String address;
+
 
   // Future<User>? _futureUser;
   final _formKey = GlobalKey<FormState>();
@@ -109,7 +108,7 @@ class RegisterState extends State<Register> {
         ),
         body:
         SingleChildScrollView (
-          child: buildForm()
+            child: buildForm()
         )
 
     );
@@ -130,7 +129,7 @@ class RegisterState extends State<Register> {
               ),
               const SizedBox(height: 25),
               TextFormField(
-                keyboardType: TextInputType.text,
+                keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.lightBlueAccent, width: 2),
@@ -144,14 +143,14 @@ class RegisterState extends State<Register> {
                   focusedErrorBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.red, width: 2),
                   ),
-                  hintText: 'Nama Lengkap',
+                  hintText: 'NIP',
                 ),
                 // The validator receives the text that the user has entered.
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Field tidak boleh kosong';
                   }
-                  name = value;
+                  nip = value;
                   return null;
                 },
               ),
@@ -184,33 +183,6 @@ class RegisterState extends State<Register> {
               ),
               const SizedBox(height: 15),
               TextFormField(
-                keyboardType: TextInputType.phone,
-                decoration: InputDecoration(
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.lightBlueAccent, width: 2),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xff1f4ea9), width: 2),
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.red, width: 2),
-                  ),
-                  focusedErrorBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.red, width: 2),
-                  ),
-                  hintText: 'Nomor HP',
-                ),
-                // The validator receives the text that the user has entered.
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Field tidak boleh kosong';
-                  }
-                  phone = value;
-                  return null;
-                },
-              ),
-              const SizedBox(height: 15),
-              TextFormField(
                 keyboardType: TextInputType.text,
                 decoration: InputDecoration(
                   focusedBorder: OutlineInputBorder(
@@ -233,34 +205,6 @@ class RegisterState extends State<Register> {
                     return 'Field tidak boleh kosong';
                   }
                   username = value;
-                  return null;
-                },
-              ),
-              const SizedBox(height: 15),
-              TextFormField(
-                keyboardType: TextInputType.text,
-                maxLines: 2,
-                decoration: InputDecoration(
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.lightBlueAccent, width: 2),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xff1f4ea9), width: 2),
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.red, width: 2),
-                  ),
-                  focusedErrorBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.red, width: 2),
-                  ),
-                  hintText: 'Alamat',
-                ),
-                // The validator receives the text that the user has entered.
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Field tidak boleh kosong';
-                  }
-                  address = value;
                   return null;
                 },
               ),
@@ -397,18 +341,16 @@ class RegisterState extends State<Register> {
     var data = {
       'email' : email,
       'password': password,
-      'phone': phone,
-      'address': address,
       'username': username,
-      'name' : name
+      'nip' : nip
     };
 
-    var res = await Network().authData(data, 'auth/signup');
+    var res = await Network().authData(data, 'bpbd-auth/signup');
     var body = json.decode(res.body);
     if(body['success']==true){
       SharedPreferences localStorage = await SharedPreferences.getInstance();
       localStorage.setString('token', json.encode(body['token']));
-      localStorage.setString('user', json.encode(body['user']));
+      localStorage.setString('bpbd', json.encode(body['bpbd']));
       Navigator.push(
         context,
         new MaterialPageRoute(

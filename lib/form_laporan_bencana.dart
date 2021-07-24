@@ -1,6 +1,12 @@
+import 'dart:convert';
+
+import 'package:darurat_app/services/laporan-provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'services/laporan-service.dart';
 // import 'package:select_form_field/select_form_field.dart';
 
 // Define a custom Form widget.
@@ -10,9 +16,12 @@ class LaporanBencana extends StatefulWidget {
 }
 
 class _LaporData {
-  String nama = '';
+  String pelapor = '';
+  String deskripsi = '';
+  String bencana = '';
+  String status = '';
+  String nomor_hp = '';
   String tanggal = '';
-  String alamat = '';
 }
 
 class Bencana {
@@ -32,6 +41,28 @@ class LaporanBencanaState extends State<LaporanBencana> {
   // not a GlobalKey<LaporanBencanaState>.
   _LaporData _dataLaporanBencana = new _LaporData();
   Bencana selectedBencana = const Bencana(1, 'Banjir');
+  String pelapor = '';
+  String deskripsi = '';
+  String bencana = '';
+  String status = '';
+  String nomor_hp = '';
+  String tanggal = '';
+  int bencana_id = 0;
+  late Future<List<dynamic>> futureDataLaporan;
+  bool _isLoading = false;
+  _loadUserData() async{
+    SharedPreferences localStorage = await SharedPreferences.getInstance();
+    var user = localStorage.getString('user') != null ? jsonDecode(localStorage.getString('user')) : '';
+
+    if(user != null) {
+      setState(() {
+        pelapor = user['name'];
+        nomor_hp = user['phone'];
+      });
+    }
+  }
+
+
   TextEditingController textController = TextEditingController(text: "Tanggal");
   List<Bencana> dataBencana = <Bencana>[
     const Bencana(1, 'Banjir'),
@@ -39,9 +70,13 @@ class LaporanBencanaState extends State<LaporanBencana> {
     const Bencana(3, 'Kekeringan'),
     const Bencana(4, 'Puting Beliung')
   ];
-
+  @override
+  void initState(){
+    super.initState();
+    _loadUserData();
+    futureDataLaporan = fetchLaporanBencana();
+  }
   final _formKey = GlobalKey<FormState>();
-
   @override
   Widget build(BuildContext context) {
     final ButtonStyle styleLaporanBencana = ElevatedButton.styleFrom(
@@ -115,115 +150,47 @@ class LaporanBencanaState extends State<LaporanBencana> {
                 alignment: Alignment.topRight,
                 height: MediaQuery.of(context).size.height,
                 width: MediaQuery.of(context).size.width,
-                child: ListView(
-                  padding: EdgeInsets.fromLTRB(20, 10, 40, 20),
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          color: Colors.white70,
-                          child: Padding(
-                            padding: EdgeInsets.all(15),
-                            child: Text('Laporan Bencana 02 Desember 2020\nNama : Rachmat\nBencana : Tanah Longsor\nAlamat Kejadian : Dander', style: TextStyle(color: Colors.black, height: 1.2),),
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                              },
-                              style: stylebuttondelete,
-                              child: Text('HAPUS', style: TextStyle(fontSize: 13)),
-                            ),
-                            const SizedBox(width: 5),
-                            ElevatedButton(
-                              onPressed: () {
 
-                              },
-                              style: stylebuttonvalidasi,
-                              child: Text('VALIDASI', style: TextStyle(fontSize: 13)),
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          color: Colors.white70,
-                          child: Padding(
-                            padding: EdgeInsets.all(15),
-                            child: Text('Laporan Bencana 02 Desember 2020\nNama : Rachmat\nBencana : Tanah Longsor\nAlamat Kejadian : Dander', style: TextStyle(color: Colors.black,  height: 1.2),),
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                              },
-                              style: stylebuttondelete,
-                              child: Text('HAPUS', style: TextStyle(fontSize: 13)),
-                            ),
-                            const SizedBox(width: 5),
-                            ElevatedButton(
-                              onPressed: () {
+                child : FutureBuilder<List<dynamic>>(
+                    future: futureDataLaporan,
+                    builder: (BuildContext context, AsyncSnapshot snapshot) {
+                      if (snapshot.hasData) {
+                        if(snapshot.data.length==0){
+                          return
+                            Align(
+                              alignment: Alignment.center,
+                              child: Text('Data Laporan Bencana kosong!', style: TextStyle(color: Colors.black, fontSize: 20))
+                            );
+                        } else {
+                          return ListView.builder(
+                              itemCount: snapshot.data.length,
+                              padding: EdgeInsets.fromLTRB(20, 10, 40, 20),
+                              itemBuilder: (BuildContext context, int index) {
+                                return
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      Card(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(5),
+                                        ),
+                                        color: Colors.white70,
+                                        child: Padding(
+                                          padding: EdgeInsets.all(15),
+                                          child: Text('Laporan Bencana ${snapshot.data![index]['tanggal']}\nNama : ${snapshot.data![index]['pelapor']}\nBencana : ${snapshot.data![index]['bencana']}\nDeskripsi : ${snapshot.data![index]['deskripsi']}\nSTATUS : ${snapshot.data![index]['status']}', style: TextStyle(color: Colors.black, height: 1.2),),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                              }
+                          );
+                        }
 
-                              },
-                              style: stylebuttonvalidasi,
-                              child: Text('VALIDASI', style: TextStyle(fontSize: 13)),
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          color: Colors.white70,
-                          child: Padding(
-                            padding: EdgeInsets.all(15),
-                            child: Text('Laporan Bencana 02 Desember 2020\nNama : Rachmat\nBencana : Tanah Longsor\nAlamat Kejadian : Dander', style: TextStyle(color: Colors.black,  height: 1.2),),
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                              },
-                              style: stylebuttondelete,
-                              child: Text('HAPUS', style: TextStyle(fontSize: 13)),
-                            ),
-                            const SizedBox(width: 5),
-                            ElevatedButton(
-                              onPressed: () {
-
-                              },
-                              style: stylebuttonvalidasi,
-                              child: Text('VALIDASI', style: TextStyle(fontSize: 13)),
-                            ),
-                          ],
-                        )
-                      ],
-                    )
-                  ],
-                ),
+                      }
+                      else {
+                        return Center(child: CircularProgressIndicator());
+                      }
+                    }),
                 color: Colors.white,
               ),
               Form(
@@ -248,36 +215,7 @@ class LaporanBencanaState extends State<LaporanBencana> {
                           endIndent: 10,
                         ),
                         const SizedBox(height: 10),
-                        TextFormField(
-                          keyboardType: TextInputType.text,
-                          decoration: InputDecoration(
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Colors.lightBlueAccent, width: 2),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Color(0xff1f4ea9), width: 2),
-                              ),
-                              errorBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.red, width: 2),
-                              ),
-                              focusedErrorBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.red, width: 2),
-                              ),
-                              hintText: 'Nama',
-                              isDense: true),
-                          // The validator receives the text that the user has entered.
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Field tidak boleh kosong';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 15),
+
                         // TextFormField(
                         //   keyboardType: TextInputType.datetime,
                         //   decoration: InputDecoration(
@@ -306,8 +244,9 @@ class LaporanBencanaState extends State<LaporanBencana> {
                         //   },
                         // ),
                         TextFormField(
-                          readOnly: true,
+                          keyboardType: TextInputType.datetime,
                           controller: textController,
+                          readOnly: true,
                           decoration: InputDecoration(
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
@@ -337,6 +276,8 @@ class LaporanBencanaState extends State<LaporanBencana> {
                                 .then((selectedDate) {
                               if (selectedDate != null) {
                                 textController.text = DateFormat('yyyy-MM-dd')
+                                    .format(selectedDate);
+                                tanggal = DateFormat('yyyy-MM-dd')
                                     .format(selectedDate);
                               }
                             });
@@ -368,13 +309,14 @@ class LaporanBencanaState extends State<LaporanBencana> {
                                 borderSide:
                                     BorderSide(color: Colors.red, width: 2),
                               ),
-                              hintText: 'Alamat kejadian',
+                              hintText: 'Deskripsi kejadian',
                               isDense: true),
                           // The validator receives the text that the user has entered.
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Field tidak boleh kosong';
                             }
+                            deskripsi = value;
                             return null;
                           },
                         ),
@@ -403,7 +345,7 @@ class LaporanBencanaState extends State<LaporanBencana> {
                           onChanged: (newValue) {
                             setState(() {
                               if (newValue != null) {
-                                selectedBencana = newValue;
+                                bencana_id = newValue.idBencana;
                               }
                             });
                           },
@@ -424,16 +366,54 @@ class LaporanBencanaState extends State<LaporanBencana> {
                             if (_formKey.currentState!.validate()) {
                               // If the form is valid, display a snackbar. In the real world,
                               // you'd often call a server or save the information in a database.
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Processing Data')));
+                              _laporkan();
                             }
                           },
                           style: styleLaporanBencana,
-                          child: Text('Lapor'),
-                        ),
+                          child: Text(_isLoading? 'Loading...' : 'Laporkan',)),
                       ],
                     ),
                   ])),
             ])));
   }
+  void _laporkan() async{
+    setState(() {
+      _isLoading = true;
+    });
+    var data = {
+     'pelapor' : pelapor,
+     'deskripsi' : deskripsi,
+     'bencana' : bencana,
+     'status' : status,
+     'nomor_hp' : nomor_hp,
+     'tanggal' : tanggal,
+     'bencana_id' : bencana_id,
+    };
+
+    var res = await Laporan().makeLaporan(data, 'laporan-bencana');
+    var body = json.decode(res.body);
+    print(data);
+    if(body['success']==true){
+      SharedPreferences localStorage = await SharedPreferences.getInstance();
+      localStorage.setString('token', json.encode(body['token']));
+      localStorage.setString('user', json.encode(body['user']));
+      Navigator.push(
+        context,
+        new MaterialPageRoute(
+            builder: (context) => LaporanBencana()
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Pengajuan laporan gagal!!', style: TextStyle(color: Colors.white, fontSize: 20)),
+
+              backgroundColor: Colors.red)
+      );
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
 }

@@ -2,13 +2,11 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:darurat_app/form_laporan_bantuan.dart';
-import 'package:darurat_app/form_laporan_bencana.dart';
 import 'package:darurat_app/informasi.dart';
-import 'package:darurat_app/login.dart';
-import 'package:darurat_app/register.dart';
 import 'package:darurat_app/welcome_page.dart';
 import 'package:flutter/material.dart';
 import 'package:darurat_app/home.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreenPage extends StatefulWidget{
   @override
@@ -16,19 +14,39 @@ class SplashScreenPage extends StatefulWidget{
 }
 
 class _SplashScreenPageState extends State<SplashScreenPage> {
+  bool isAuth = false;
   @override
   void initState(){
     super.initState();
     startSpashScreen();
+    _checkIfLoggedIn();
+
+  }
+  void _checkIfLoggedIn() async{
+    SharedPreferences localStorage = await SharedPreferences.getInstance();
+    var token = localStorage.getString('token');
+    if(token != null){
+      setState(() {
+        isAuth = true;
+      });
+    }
   }
   startSpashScreen() async {
     var duration = const Duration(seconds: 5);
     return Timer(duration, (){
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_){
-          return HomePage();
-        })
-      );
+      if(isAuth==true){
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_){
+              return HomePage();
+            })
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_){
+              return WelcomePage();
+            })
+        );
+      }
     });
   }
   @override
