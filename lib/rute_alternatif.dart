@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:darurat_app/locations.dart' as locations;
 import 'dart:async';
@@ -22,7 +23,20 @@ class _RuteAlternatifState extends State<RuteAlternatif> {
   Widget build(BuildContext context) {
     return  Scaffold(
       appBar: AppBar(
-        centerTitle: true,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(CupertinoIcons.car),
+            onPressed: () {
+
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.pedal_bike),
+            onPressed: () {
+            },
+          ),
+
+        ],
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
@@ -158,31 +172,31 @@ class _RuteAlternatifState extends State<RuteAlternatif> {
           )
         ],
 
-        bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
-          selectedItemColor: Colors.black,
-          unselectedItemColor: Colors.black.withOpacity(.60),
-          selectedFontSize: 14,
-          unselectedFontSize: 14,
-          onTap: (value) {
-            // Respond to item press.
-          },
-          items: [
-            BottomNavigationBarItem(
-              title: Text('Bantuan'),
-              icon: Icon(Icons.info_outline_rounded),
-            ),
-            BottomNavigationBarItem(
-              title: Text('Informasi'),
-              icon: Icon(Icons.account_circle),
-            ),
-            BottomNavigationBarItem(
-              title: Text('Profil'),
-              icon: Icon(Icons.account_circle),
-            ),
-          ],
-        )
+        // bottomNavigationBar: BottomNavigationBar(
+        //   type: BottomNavigationBarType.fixed,
+        //   backgroundColor: Colors.white,
+        //   selectedItemColor: Colors.black,
+        //   unselectedItemColor: Colors.black.withOpacity(.60),
+        //   selectedFontSize: 14,
+        //   unselectedFontSize: 14,
+        //   onTap: (value) {
+        //     // Respond to item press.
+        //   },
+        //   items: [
+        //     BottomNavigationBarItem(
+        //       title: Text('Bantuan'),
+        //       icon: Icon(Icons.info_outline_rounded),
+        //     ),
+        //     BottomNavigationBarItem(
+        //       title: Text('Informasi'),
+        //       icon: Icon(Icons.account_circle),
+        //     ),
+        //     BottomNavigationBarItem(
+        //       title: Text('Profil'),
+        //       icon: Icon(Icons.account_circle),
+        //     ),
+        //   ],
+        // )
     );
   }
 }

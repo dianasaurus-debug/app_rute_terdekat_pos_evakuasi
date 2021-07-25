@@ -160,10 +160,10 @@ class LaporanBantuanBPBDState extends State<LaporanBantuanBPBD> {
   void validasi(id) async {
     var res = await Laporan().validasiLaporan('laporan-bantuan/validate/${id}');
     var body = json.decode(res.body);
-    if (body['success']) {
+    if (body['success']==true) {
       Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => LaporanBantuanBPBD()), (Route<dynamic> route) => false);
     } else {
-      print('gagal');
+      print(body);
     }
   }
   void tolak(id) async {

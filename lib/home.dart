@@ -94,9 +94,7 @@ class _HomePageState extends State<HomePage> {
             )
           ],
         ),
-        body: Container(
-          color: Colors.white,
-          width: double.infinity,
+        body: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [

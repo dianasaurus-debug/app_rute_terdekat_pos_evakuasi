@@ -80,21 +80,14 @@ class _InformasiState extends State<Informasi> {
                                     numeric: true),
                                 DataColumn(
                                   label: Text(
-                                    'Kecamatan',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                                DataColumn(
-                                  label: Text(
-                                    'Desa',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                                DataColumn(
-                                  label: Text(
                                     'Nama Posko',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Alamat',
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold),
                                   ),
@@ -107,14 +100,12 @@ class _InformasiState extends State<Informasi> {
                                         (snapshot.data.indexOf(e) + 1)
                                             .toString(),
                                         textAlign: TextAlign.left)),
-                                    DataCell(Text(e['kecamatan'],
-                                        textAlign: TextAlign.left)),
-                                    DataCell(Text(e['desa'],
+                                    DataCell(Text(e['nama_posko'],
                                         textAlign: TextAlign.left)),
                                     DataCell(
                                       Container(
                                           width: 170, //SET width
-                                          child: Text(e['nama_posko'],
+                                          child: Text(e['alamat'],
                                               textAlign: TextAlign.left)),
                                     )
                                   ],
