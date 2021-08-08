@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "592787338726",
+    "project_id": "darurat-app",
+    "storage_bucket": "darurat-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:592787338726:android:c4ade9305fe61a5eee5227",
+        "android_client_info": {
+          "package_name": "com.example.darurat_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "592787338726-865n53fgi8d27bi4lhhsk4dik8gm3naa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAVP9nu2xXVY5AQm7JNU9O-0E4XSgz-1cs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "592787338726-865n53fgi8d27bi4lhhsk4dik8gm3naa.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

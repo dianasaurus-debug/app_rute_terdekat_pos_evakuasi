@@ -1,7 +1,9 @@
 import 'package:darurat_app/services/pos-evakuasi.dart';
 import 'package:darurat_app/services/riwayat-bencana.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:overlay_support/overlay_support.dart';
 
 class Informasi extends StatefulWidget {
   Informasi({Key? key}) : super(key: key);
@@ -14,9 +16,21 @@ class _InformasiState extends State<Informasi> {
   late Future<List<dynamic>> futureRiwayatBencana;
   late Future<List<dynamic>> futurePosEvakuasi;
   var i = 0;
+  late FirebaseMessaging messaging;
 
   @override
   void initState() {
+    messaging = FirebaseMessaging.instance;
+    FirebaseMessaging.onMessage.listen((RemoteMessage event) {
+      showSimpleNotification(
+        Text(event.notification!.title!),
+        leading: Icon(Icons.warning_rounded, color : Colors.red),
+        subtitle: Text(event.notification!.body!),
+        background: Colors.cyan.shade700,
+        duration: Duration(seconds: 10),
+      );
+    });
+    messaging.subscribeToTopic("bencana");
     super.initState();
     futureRiwayatBencana = fetchRiwayatBencana();
     futurePosEvakuasi = fetchPosEvakuasi();

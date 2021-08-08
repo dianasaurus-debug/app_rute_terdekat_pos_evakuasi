@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Laporan{
-  final String _url = 'http://192.168.43.204:8000/api/';
+  final String _url = 'http://tanggap.ngodingcerdas.com/api/';
   var token;
 
   _getToken() async {

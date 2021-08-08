@@ -40,12 +40,12 @@ class Locations {
 }
 
 Future<Locations> getGoogleOffices() async {
-  const googleLocationsURL = 'http://192.168.43.204:8000/api/posko-evakuasi/';
+  const googleLocationsURL = 'http://tanggap.ngodingcerdas.com/api/posko-evakuasi/';
 
   // Retrieve the locations of Google offices
   final response = await http.get(Uri.parse(googleLocationsURL));
+  print(json.encode(response.body));
   if (response.statusCode == 200) {
-    print(json.encode(response.body));
     return Locations.fromJson(json.decode(response.body));
   } else {
     throw HttpException(

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:darurat_app/pos-evakuasi-service.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +12,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:darurat_app/lokasi-poskos.dart' as locations;
 import 'package:location/location.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:overlay_support/overlay_support.dart';
 // import 'package:geocoding/geocoding.dart';
 
 class RuteEvakuasi extends StatefulWidget {
@@ -47,23 +49,59 @@ class _RuteEvakuasiState extends State<RuteEvakuasi> {
   double _lat = -7.317463;
   double _lng = 111.761466;
   Completer<GoogleMapController> _controller = Completer();
+  late FirebaseMessaging messaging;
 
   Future<void> _onMapCreated(GoogleMapController controller) async {
     final googleOffices = await locations.getGoogleOffices();
+    final dataBencanaBaru = await PoskoEvakuasiService().getBencanaBaru();
+    final decodedDataBencana = json.decode(dataBencanaBaru.body)['data'];
     _controller.complete(controller);
+    Future<Uint8List> getBytesFromAsset(String path, int width) async {
+      ByteData data = await rootBundle.load(path);
+      ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
+          targetWidth: width);
+      ui.FrameInfo fi = await codec.getNextFrame();
+      return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
+          .buffer
+          .asUint8List();
+    }
+    final Uint8List markerIconWarning = await getBytesFromAsset('images/warning_pin.png', 50);
+    final Uint8List markerIcon = await getBytesFromAsset('images/icon-lokasi-saya.png', 50);
+
     setState(() {
+      messaging = FirebaseMessaging.instance;
+      FirebaseMessaging.onMessage.listen((RemoteMessage event) {
+        showSimpleNotification(
+          Text(event.notification!.title!),
+          leading: Icon(Icons.warning_rounded, color : Colors.red),
+          subtitle: Text(event.notification!.body!),
+          background: Colors.cyan.shade700,
+          duration: Duration(seconds: 10),
+        );
+      });
+      messaging.subscribeToTopic("bencana");
       _markers.clear();
-      for (final posko in googleOffices.data) {
+      _markers['Lokasi saya'] = Marker(
+        icon: BitmapDescriptor.fromBytes(markerIcon),
+        markerId: MarkerId('Lokasi saya'),
+        position: LatLng(_lat, _lng),
+        infoWindow: InfoWindow(
+          title: 'Lokasi saya',
+        ),
+      );
+      for (final bencana in decodedDataBencana) {
         final marker = Marker(
-          markerId: MarkerId(posko.nama_posko),
-          position: LatLng(posko.latitude, posko.longitude),
+          markerId: MarkerId(bencana['id'].toString()),
+          icon: BitmapDescriptor.fromBytes(markerIconWarning),
+          position: LatLng(double.parse(bencana['latitude']), double.parse(bencana['longitude'])),
           infoWindow: InfoWindow(
-            title: posko.nama_posko,
-            snippet: posko.alamat,
+            title: '${bencana['bencana']} di ${bencana['desa']}',
+            snippet: 'Awas ada ${bencana['bencana']} di desa ${bencana['desa']}',
           ),
         );
-        _markers[posko.nama_posko] = marker;
+        _markers[bencana['id'].toString()] = marker;
       }
+
     });
   }
   _locateMe() async {
@@ -83,13 +121,13 @@ class _RuteEvakuasiState extends State<RuteEvakuasi> {
       }
     }
     await location.getLocation().then((res) async {
-      // final GoogleMapController controller = await _controller.future;
-      // final _position = CameraPosition(
-      //   target: LatLng(res.latitude!, res.longitude!),
-      //   zoom: 12,
-      // );
-      // controller.animateCamera(CameraUpdate.newCameraPosition(_position));
+      final GoogleMapController controller = await _controller.future;
+      controller.moveCamera(CameraUpdate.newLatLngZoom(LatLng(res.latitude!, res.longitude!), 12));
       setState(() {
+        _currentPosition = CameraPosition(
+          target: LatLng(res.latitude!, res.longitude!),
+          zoom: 12,
+        );
         _lat = res.latitude!;
         _lng = res.longitude!;
       });
@@ -98,9 +136,8 @@ class _RuteEvakuasiState extends State<RuteEvakuasi> {
 
   @override
   void initState() {
-    // TODO: implement initState
+    _locateMe();
     super.initState();
-
   }
   @override
   Widget build(BuildContext context) {
@@ -171,32 +208,6 @@ class _RuteEvakuasiState extends State<RuteEvakuasi> {
             ]
           )
         ],
-
-        // bottomNavigationBar: BottomNavigationBar(
-        //   type: BottomNavigationBarType.fixed,
-        //   backgroundColor: Colors.white,
-        //   selectedItemColor: Colors.black,
-        //   unselectedItemColor: Colors.black.withOpacity(.60),
-        //   selectedFontSize: 14,
-        //   unselectedFontSize: 14,
-        //   onTap: (value) {
-        //     // Respond to item press.
-        //   },
-        //   items: [
-        //     BottomNavigationBarItem(
-        //       title: Text('Bantuan'),
-        //       icon: Icon(Icons.info_outline_rounded),
-        //     ),
-        //     BottomNavigationBarItem(
-        //       title: Text('Informasi'),
-        //       icon: Icon(Icons.account_circle),
-        //     ),
-        //     BottomNavigationBarItem(
-        //       title: Text('Profil'),
-        //       icon: Icon(Icons.account_circle),
-        //     ),
-        //   ],
-        // )
     );
   }
   void getDataPosko(jenisKendaraan) async {
@@ -210,41 +221,27 @@ class _RuteEvakuasiState extends State<RuteEvakuasi> {
         target: LatLng(double.parse(body['palingdekat'][0]['latitude']), double.parse(body['palingdekat'][0]['longitude'])),
         zoom: 10,
       );
-      // List<Placemark> placemarks = await placemarkFromCoordinates(-7.201024,111.938835);
-      // print(placemarks);
       controller.showMarkerInfoWindow(MarkerId(body['palingdekat'][0]['nama_posko']));
-
-      Future<Uint8List> getBytesFromAsset(String path, int width) async {
-        ByteData data = await rootBundle.load(path);
-        ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: width);
-        ui.FrameInfo fi = await codec.getNextFrame();
-        return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
-      }
-      final Uint8List markerIcon = await getBytesFromAsset('images/icon-lokasi-saya.png', 100);
-
       setState(() {
         posko_terdekat = body['palingdekat'][0]['nama_posko'];
-        _markers['Lokasi saya'] = Marker(
-          icon: BitmapDescriptor.fromBytes(markerIcon),
-          markerId: MarkerId('Lokasi saya'),
-          position: LatLng(-7.201024, 111.938835),
-          infoWindow: InfoWindow(
-            title: 'Lokasi saya',
-          ),
-        );
       });
       // controller.showMarkerInfoWindow(MarkerId('Lokasi saya'));
 
-      var titikKoordinat = await PoskoEvakuasiService().getKoordinatPosko(-7.201024,111.938835, double.parse(body['palingdekat'][0]['latitude']), double.parse(body['palingdekat'][0]['longitude']), jenisKendaraan);
+      var titikKoordinat = await PoskoEvakuasiService().getKoordinatPosko(_lat, _lng, double.parse(body['palingdekat'][0]['latitude']), double.parse(body['palingdekat'][0]['longitude']), jenisKendaraan);
 
-      print(_lat);
-      print(json.decode(titikKoordinat.body)['paths']);
       var daftarKoordinat = json.decode(titikKoordinat.body)['paths'][0]['points']['coordinates'];
       setState(() {
         jarak_posko = (json.decode(titikKoordinat.body)['paths'][0]['distance']/1000).toStringAsFixed(2);
         daftar_rute = json.decode(titikKoordinat.body)['paths'][0]['instructions'];
         vehicle = jenisKendaraan;
         points.clear();
+        _markers[body['palingdekat'][0]['nama_posko']] = Marker(
+          markerId: MarkerId(body['palingdekat'][0]['nama_posko']),
+          position: LatLng(double.parse(body['palingdekat'][0]['latitude']), double.parse(body['palingdekat'][0]['longitude'])),
+          infoWindow: InfoWindow(
+            title: '${body['palingdekat'][0]['nama_posko']}',
+          ),
+        );
       });
       for(var koordinat in daftarKoordinat){
         points.add(LatLng(koordinat[1], koordinat[0]));

@@ -1,7 +1,10 @@
 import 'dart:convert';
 
 import 'package:darurat_app/services/auth-service.dart';
+import 'package:darurat_app/welcome_page.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'login.dart';
@@ -27,8 +30,20 @@ class _ProfilPageBPBDState extends State<ProfilPageBPBD> {
       elevation: 2,
       shape: StadiumBorder()
   );
+  late FirebaseMessaging messaging;
+
   @override
-  void initState(){
+  void initState() {
+    messaging = FirebaseMessaging.instance;
+    FirebaseMessaging.onMessage.listen((RemoteMessage event) {
+      showSimpleNotification(
+        Text(event.notification!.title!),
+        leading: Icon(Icons.warning_rounded, color : Colors.red),
+        subtitle: Text(event.notification!.body!),
+        background: Colors.cyan.shade700,
+        duration: Duration(seconds: 10),
+      );
+    });
     super.initState();
     _loadUserData();
   }
@@ -72,7 +87,8 @@ class _ProfilPageBPBDState extends State<ProfilPageBPBD> {
               children: [
                 CircleAvatar(
                     radius: 80,
-                    backgroundImage: NetworkImage('https://static.qobuz.com/images/artists/covers/medium/dfc8724155044259e3c809c75fd2e8e4.jpg')
+                    backgroundImage: NetworkImage(
+                        'https://cdn.iconscout.com/icon/free/png-256/account-avatar-profile-human-man-user-30448.png')
                 ),
                 const SizedBox(height: 15),
                 Text('Hai, $username',
@@ -121,7 +137,7 @@ class _ProfilPageBPBDState extends State<ProfilPageBPBD> {
       SharedPreferences localStorage = await SharedPreferences.getInstance();
       localStorage.remove('bpbd');
       localStorage.remove('token');
-      Navigator.push(context, MaterialPageRoute(builder: (context) => Login()));
+      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => WelcomePage()), (Route<dynamic> route) => false);
     } else {
       print('gagal');
     }

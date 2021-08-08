@@ -5,13 +5,16 @@ import 'package:darurat_app/form_laporan_bencana.dart';
 import 'package:darurat_app/informasi.dart';
 import 'package:darurat_app/laporan-bantuan-bpbd.dart';
 import 'package:darurat_app/laporan-bencana-bpbd.dart';
+import 'package:darurat_app/posko-evakuasi.dart';
 import 'package:darurat_app/profil_bpbd.dart';
 import 'package:darurat_app/profile.dart';
 import 'package:darurat_app/rute_alternatif.dart';
 import 'package:darurat_app/rute_evakuasi.dart';
 import 'package:darurat_app/services/auth-service.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'login.dart';
@@ -30,12 +33,26 @@ class _HomePageState extends State<HomePage> {
   late String address;
 
   late bool isBPBD = false;
+
+  late FirebaseMessaging messaging;
+
+
   @override
   void initState() {
+    messaging = FirebaseMessaging.instance;
+    FirebaseMessaging.onMessage.listen((RemoteMessage event) {
+      showSimpleNotification(
+        Text(event.notification!.title!),
+        leading: Icon(Icons.warning_rounded, color : Colors.red),
+        subtitle: Text(event.notification!.body!),
+        background: Colors.cyan.shade700,
+        duration: Duration(seconds: 10),
+      );
+    });
+    messaging.subscribeToTopic("bencana");
     _loadUserData();
     super.initState();
   }
-
   _loadUserData() async {
     SharedPreferences localStorage = await SharedPreferences.getInstance();
     var user = localStorage.getString('user') != null ? jsonDecode(localStorage.getString('user')) : '';
@@ -159,7 +176,7 @@ class _HomePageState extends State<HomePage> {
                                       onTap: () {
                                         Route route = MaterialPageRoute(
                                             builder: (context) =>
-                                                RuteEvakuasi());
+                                                PoskoEvakuasi());
                                         Navigator.push(context, route);
                                       },
                                       child: Card(

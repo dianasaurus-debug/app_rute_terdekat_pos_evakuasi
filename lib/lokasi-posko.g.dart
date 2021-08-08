@@ -10,8 +10,8 @@ PoskoEvakuasi _$PoskoEvakuasiFromJson(Map<String, dynamic> json) {
   return PoskoEvakuasi(
     id: (json['id'] as num).toInt(),
     alamat: json['alamat'] as String,
-    latitude: double.parse(json['latitude']),
-    longitude: double.parse(json['longitude']),
+    latitude: (json['latitude'] as num).toDouble(),
+    longitude: (json['longitude'] as num).toDouble(),
     nama_posko: json['nama_posko'] as String,
   );
 }

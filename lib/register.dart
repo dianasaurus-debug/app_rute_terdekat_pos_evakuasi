@@ -407,7 +407,7 @@ class RegisterState extends State<Register> {
     var body = json.decode(res.body);
     if(body['success']==true){
       SharedPreferences localStorage = await SharedPreferences.getInstance();
-      localStorage.setString('token', json.encode(body['token']));
+      localStorage.setString('token', json.encode(body['token']['token']));
       localStorage.setString('user', json.encode(body['user']));
       Navigator.push(
         context,

@@ -349,7 +349,7 @@ class RegisterBPBDState extends State<RegisterBPBD> {
     var body = json.decode(res.body);
     if(body['success']==true){
       SharedPreferences localStorage = await SharedPreferences.getInstance();
-      localStorage.setString('token', json.encode(body['token']));
+      localStorage.setString('token', json.encode(body['token']['token']));
       localStorage.setString('bpbd', json.encode(body['bpbd']));
       Navigator.push(
         context,

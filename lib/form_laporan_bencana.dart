@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:darurat_app/services/laporan-provider.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'services/laporan-service.dart';
@@ -70,8 +72,20 @@ class LaporanBencanaState extends State<LaporanBencana> {
     const Bencana(3, 'Kekeringan'),
     const Bencana(4, 'Puting Beliung')
   ];
+  late FirebaseMessaging messaging;
+
   @override
-  void initState(){
+  void initState() {
+    messaging = FirebaseMessaging.instance;
+    FirebaseMessaging.onMessage.listen((RemoteMessage event) {
+      showSimpleNotification(
+        Text(event.notification!.title!),
+        leading: Icon(Icons.warning_rounded, color : Colors.red),
+        subtitle: Text(event.notification!.body!),
+        background: Colors.cyan.shade700,
+        duration: Duration(seconds: 10),
+      );
+    });
     super.initState();
     _loadUserData();
     futureDataLaporan = fetchLaporanBencana();

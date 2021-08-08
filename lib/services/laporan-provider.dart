@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-String baseURL = 'http://192.168.43.204:8000/api/';
+String baseURL = 'http://tanggap.ngodingcerdas.com/api/';
 //sop_banjir
 Future<List<dynamic>> fetchLaporanBencana() async {
   var result = await http.get(Uri.parse(baseURL+'laporan-bencana'));

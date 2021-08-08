@@ -2,9 +2,11 @@ import 'dart:convert';
 
 import 'package:darurat_app/services/laporan-provider.dart';
 import 'package:darurat_app/services/laporan-service.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:overlay_support/overlay_support.dart';
 // import 'package:select_form_field/select_form_field.dart';
 
 // Define a custom Form widget.
@@ -45,11 +47,23 @@ class LaporanBencanaBPBDState extends State<LaporanBencanaBPBD> {
   ];
 
   late Future<List<dynamic>> futureDataLaporan;
+  late FirebaseMessaging messaging;
 
 
   final _formKey = GlobalKey<FormState>();
   void initState() {
     // TODO: implement initState
+    messaging = FirebaseMessaging.instance;
+    FirebaseMessaging.onMessage.listen((RemoteMessage event) {
+      showSimpleNotification(
+        Text(event.notification!.title!),
+        leading: Icon(Icons.warning_rounded, color : Colors.red),
+        subtitle: Text(event.notification!.body!),
+        background: Colors.cyan.shade700,
+        duration: Duration(seconds: 10),
+      );
+    });
+    messaging.subscribeToTopic("bencana");
     super.initState();
     futureDataLaporan = fetchLaporanBencana();
 
